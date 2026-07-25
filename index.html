@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -218,7 +217,7 @@
                     "He's an asshole"
                 </blockquote>
                 <div class="flex flex-col items-center">
-                    <span class="font-sans text-sm uppercase tracking-[0.2em] font-bold text-brand-primary">Anonymous</span>
+                    <span class="font-sans text-sm uppercase tracking-[0.2em] font-bold text-brand-primary">Annonymous</span>
                     <span class="font-sans text-[11px] uppercase tracking-widest text-brand-secondary/60 mt-2">Traumatized Barn Manager</span>
                 </div>
             </div>
@@ -341,14 +340,14 @@
                             </div>
                         </div>
                         <div class="gallery-item w-[280px] md:w-[350px] h-[350px] flex-shrink-0 bg-brand-secondary/5 cursor-pointer rounded-sm snap-start">
-                            <img src="img/IMG_7587.jpg" alt="Fleeing the Scene" class="w-full h-full object-cover" />
+                            <img src="img/IMG_7587.JPG" alt="Fleeing the Scene" class="w-full h-full object-cover" />
                             <div class="gallery-overlay absolute inset-0 flex flex-col justify-end p-6">
                                 <span class="font-serif text-xl text-brand-accent mb-1">Fleeing The Scene</span>
                                 <span class="font-sans text-[9px] uppercase tracking-[0.2em] text-brand-primary">Evading capture after throwing rider</span>
                             </div>
                         </div>
                            <div class="gallery-item w-[280px] md:w-[350px] h-[350px] flex-shrink-0 bg-brand-secondary/5 cursor-pointer rounded-sm snap-start">
-                            <img src="img/IMG_7725.jpg" alt="Fleeing the Scene" class="w-full h-full object-cover" />
+                            <img src="img/IMG_7725.JPG" alt="Fleeing the Scene" class="w-full h-full object-cover" />
                             <div class="gallery-overlay absolute inset-0 flex flex-col justify-end p-6">
                                 <span class="font-serif text-xl text-brand-accent mb-1">Fleeing The Scene</span>
                                 <span class="font-sans text-[9px] uppercase tracking-[0.2em] text-brand-primary">Evading capture after throwing rider</span>
@@ -446,6 +445,20 @@
         </footer>
     </div>
 
+    <!-- LIGHTBOX OVERLAY MODAL -->
+    <div id="lightbox" class="fixed inset-0 bg-brand-secondary/95 z-[100] hidden flex-col justify-center items-center opacity-0 backdrop-blur-md">
+        <button id="lightbox-close" class="absolute top-8 right-8 text-brand-accent hover:text-brand-primary transition-colors p-2 z-[101]">
+            <i data-lucide="x" class="w-8 h-8"></i>
+        </button>
+        <div class="relative max-w-5xl w-full max-h-[80vh] px-6 flex flex-col items-center">
+            <img id="lightbox-img" src="" alt="Enzo Crime" class="max-w-full max-h-[60vh] object-contain rounded-sm shadow-2xl mb-6">
+            <div class="text-center">
+                <h3 id="lightbox-title" class="font-serif text-3xl md:text-4xl text-brand-accent mb-2 drop-shadow-md"></h3>
+                <p id="lightbox-desc" class="font-sans text-[11px] uppercase tracking-[0.2em] text-brand-primary font-bold"></p>
+            </div>
+        </div>
+    </div>
+
     <!-- ENGINE PLATFORM RUNTIME CONTROLS -->
     <script>
         // CORE SLIDER SPECIFICATION SHEET (Now focused on text content over the static video)
@@ -469,6 +482,7 @@
         // APP INITIALIZATION SEQUENCE
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
+            initLightbox();
             
             gsap.to("#loader-track", {
                 width: "100%",
@@ -486,6 +500,68 @@
                 }
             });
         });
+
+        // LIGHTBOX SYSTEM ENGINE
+        function initLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const lightboxTitle = document.getElementById('lightbox-title');
+            const lightboxDesc = document.getElementById('lightbox-desc');
+            const closeBtn = document.getElementById('lightbox-close');
+            const galleryItems = document.querySelectorAll('.gallery-item');
+
+            const openLightbox = (imgSrc, title, desc) => {
+                lightboxImg.src = imgSrc;
+                lightboxTitle.innerText = title;
+                lightboxDesc.innerText = desc;
+                
+                lightbox.classList.remove('hidden');
+                lightbox.classList.add('flex');
+                
+                // Animate overlay and scale image in
+                gsap.to(lightbox, { opacity: 1, duration: 0.3, ease: "power2.out" });
+                gsap.fromTo(lightboxImg, 
+                    { scale: 0.9, opacity: 0 }, 
+                    { scale: 1, opacity: 1, duration: 0.4, delay: 0.1, ease: "back.out(1.5)" }
+                );
+            };
+
+            const closeLightbox = () => {
+                gsap.to(lightbox, { 
+                    opacity: 0, 
+                    duration: 0.3, 
+                    ease: "power2.inOut",
+                    onComplete: () => {
+                        lightbox.classList.add('hidden');
+                        lightbox.classList.remove('flex');
+                        lightboxImg.src = ""; // Flush image 
+                    }
+                });
+            };
+
+            // Bind click event to each gallery element
+            galleryItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const img = item.querySelector('img').src;
+                    const title = item.querySelector('.gallery-overlay span.font-serif').innerText;
+                    const desc = item.querySelector('.gallery-overlay span.font-sans').innerText;
+                    openLightbox(img, title, desc);
+                });
+            });
+
+            // Bind closing mechanisms (X button, Backdrop click, Escape key)
+            closeBtn.addEventListener('click', closeLightbox);
+            
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !lightbox.classList.contains('hidden')) {
+                    closeLightbox();
+                }
+            });
+        }
 
         function runEntranceLayouts() {
             gsap.from("h1", { opacity: 0, y: 30, duration: 0.8, ease: "power2.out" });
